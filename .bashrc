@@ -1,6 +1,7 @@
 # This .bashrc is an example bash config file to make Vim auto-start NERDTree on launch.
 # And, "vimupdate" alias (vim +PlugInstall).
-HOME="/c/Users/olafc/.gb"; export HOME
+
+# If you have Git Bash then uncomment it: HOME="/c/Users/`whoami`/.gb"; export HOME
 BLUEbg="`tput setab 4``tput bold`"
 YELLOWbg="`tput setab 3``tput bold`"
 YELLOWtt="`tput setaf 3``tput bold`"
