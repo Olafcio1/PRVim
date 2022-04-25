@@ -27,6 +27,7 @@ elif [[ "$1" == "--other-modify" ]]; then
     copymod .bashrc
 else
     ignoremsg .bashrc
+    copy .bashrc .bashrc_virtualenv
 fi
 copy .vimrc
 for file in `ls`; do
