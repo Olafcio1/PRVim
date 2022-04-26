@@ -28,7 +28,6 @@ endif
 if empty(glob(home_dir . '/.prvim'))
   silent execute '!mkdir '.prvim_dir
 endif
-silent execute '!echo '.PRVIM_version.'>'.prvim_dir.'/installed'
 silent execute '!echo '.PRVIM_version.'>'.prvim_dir.'/.installed'
 
 " Make SET-s
@@ -292,9 +291,6 @@ nnoremap xx dd
 nnoremap X D
 
 " Make INOREMAP-s
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
 inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
