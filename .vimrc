@@ -147,8 +147,6 @@ Plug 'mattn/emmet-vim'
 Plug 'xolox/vim-lua-ftplugin'
 " Lua-Inspect
 Plug 'xolox/vim-lua-inspect'
-"  Lua
-Plug 'tbastos/vim-lua'
 " Misc
 Plug 'xolox/vim-misc'
 " Session
