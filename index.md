@@ -3,7 +3,7 @@ PRVim is an [Vim](https://vim.org) config that makes Vim like an nice IDE.
 <br>
 ### README.md
 #### What's it?
-PRVim is an Vim config, but when you run Vim using this config, it will be just... an very nice IDE.
+PRVim is an Vim config, but when you run Vim using this config, it will be just... a very nice IDE.
 #### How to setup?
 You can download .vimrc and copy it to your home directory, or install it in virtual environment (look below), or download setup.sh file to setup it.
 #### I want to test it... launch in virtual environment!
