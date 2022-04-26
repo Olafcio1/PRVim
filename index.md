@@ -14,6 +14,8 @@ Just change HOME, USER and HOSTNAME variables, and boom! Programs think you are 
 3. Setupping it?<br>
 Just download setup.sh file, and say that you want PRVim in virtual environment. Then type path of directory that you want to make that your home directory in your virtual environment be there. And working!
 <br>
+<br>
+<br>
 ##### Created for free, for everyone
 
 [comment]: ```markdown
