@@ -28,6 +28,7 @@ endif
 if empty(glob(home_dir . '/.prvim'))
   silent execute '!mkdir '.prvim_dir
 endif
+silent execute '!echo '.PRVIM_version.'>'.prvim_dir.'/installed'
 silent execute '!echo '.PRVIM_version.'>'.prvim_dir.'/.installed'
 
 " Make SET-s
