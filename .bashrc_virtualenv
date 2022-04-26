@@ -6,10 +6,10 @@
 function dc(){
     echo "Command '$1' is disabled in virtual environment."
 }
-USER="olafcio"
-OHOME="$HOME"; export OHOME
-HOME="/Users/olafcio/.virtualenv_OlafcioVirtualBashPC"; export HOME
-HOSTNAME="OlafcioVirtualBashPC"; export HOSTNAME
+USER="olafcio" # Your username in virtual environment
+OHOME="$HOME"; export OHOME # For programs that want your real home, not home in virtual environment
+HOME="/Users/olafcio/.virtualenv_OlafcioVirtualBashPC"; export HOME # Your home directory in virtual environment
+HOSTNAME="OlafcioVirtualBashPC"; export HOSTNAME # Your hostname in virtual environment
 function whoami(){
     echo "$USER"
 }
@@ -45,9 +45,9 @@ alias vimupdate="/usr/bin/vim +PlugInstall"
 function save_backup(){
     if [[ -d "$HOME/.backup" ]]; then
         echo " WARNING: Overwritting old backup!"
-        rm -r $HOME/./.OVBPC.backup
+        rm -r $HOME/./.VENVPC.backup
     fi
-    cp -R $HOME $HOME/../.OVBPC.backup
+    cp -R $HOME $HOME/../.VENVPC.backup
     echo "Saved all changes to backup."
 }
 clear
