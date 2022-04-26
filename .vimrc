@@ -1,8 +1,11 @@
 " PRVim - Programming Ready Vim
 " PRVim is Vim with special config to make Vim 'programming ready', like an IDE.
+let PRVIM_version="0.3"
 
 " Make LET-s
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+let home_dir = $HOME
+let prvim_dir = home_dir.'/.prvim'
 let mapleader=','
 let g:sesion_directory = "~/.vim/session"
 let g:session_autoload = "no"
@@ -14,14 +17,6 @@ let g:indentLine_enabled = 1
 let g:indentLine_concealcursor = 0
 let g:indentLine_char = '┆'
 let g:indentLine_faster = 1
-let g:NERDTreeChDirMode=2
-let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
-let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
-let g:NERDTreeShowBookmarks=1
-let g:nerdtree_tabs_focus_on_files=1
-let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
-let g:NERDTreeWinSize = 50
-let g:ctrlp_map = '<C-f>'
 let start=line('.')
 
 " Add plug.vim
@@ -29,6 +24,11 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
+
+if empty(glob(home_dir . '/.prvim'))
+  silent execute '!mkdir '.prvim_dir
+endif
+silent execute '!echo '.PRVIM_version.'>'.prvim_dir.'/.installed'
 
 " Make SET-s
 set number
@@ -65,6 +65,8 @@ set undofile
 set lazyredraw
 set display+=lastline
 set encoding=utf-8 nobomb
+set foldmethod=syntax
+set clipboard=unnamedplus
 
 " To make syntax before saving and VIM-ing file again
 filetype indent on
@@ -77,15 +79,23 @@ Plug 'dense-analysis/ale'
 Plug 'junegunn/vim-easy-align'
 " NERDTree
 Plug 'scrooloose/nerdtree'
+let g:NERDTreeChDirMode=2
+let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
+let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
+let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
+let g:NERDTreeShowBookmarks=1
+let g:nerdtree_tabs_focus_on_files=1
+let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
+let g:NERDTreeWinSize = 50
 " FZF
 Plug 'junegunn/fzf.vim'
 " Vim-Startify
 Plug 'mhinz/vim-startify'
 let g:startify_lists = [
-            \ { 'type': 'files',     'header': ['   Latest files']                   },
-            \ { 'type': 'dir',       'header': ['   Latest files in this directory'] },
-            \ { 'type': 'sessions',  'header': ['   Sessions']                       },
-            \ { 'type': 'commands',  'header': ['   Utility commands']               },
+            \ { 'type': 'files',     'header': ['      Latest files']                   },
+            \ { 'type': 'dir',       'header': ['      Latest files in this directory'] },
+            \ { 'type': 'sessions',  'header': ['      Sessions']                       },
+            \ { 'type': 'commands',  'header': ['      Utility commands']               },
             \ ]
 let g:startify_commands = [
             \ ['Update plugins',       'PlugInstall'],
@@ -100,8 +110,6 @@ let g:startify_custom_header = [
             \ '| |    | | \ \  \  /  | | | | | | |',
             \ '|_|    |_|  \_\  \/   |_|_| |_| |_|',
             \ ]
-" tabbar
-Plug 'humiaozuzu/tabbar'
 " DelimitMate
 Plug 'raimondi/delimitmate'
 " CSS-Color
@@ -119,6 +127,8 @@ Plug 'tacahiroy/ctrlp-funky'
 Plug 'davidegx/ctrlp-smarttabs'
 Plug 'tacahiroy/ctrlp-ssh'
 Plug 'okcompute/vim-ctrlp-session'
+let g:ctrlp_map = ''
+let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
 " EmacsCommandLine
 Plug 'houtsnip/vim-emacscommandline'
 " DevIcons
@@ -131,10 +141,6 @@ Plug 'heavenshell/vim-jsdoc'
 Plug 'matze/vim-move'
 " CSS3-syntax
 Plug 'hail2u/vim-css3-syntax'
-" Coloresque
-Plug 'goo/vim-coloresque'
-" Haml
-Plug 'trope/vim-haml'
 " Emmet
 Plug 'mattn/emmet-vim'
 " Lua-Ftplugin
@@ -151,6 +157,20 @@ Plug 'honza/vim-snippets'
 Plug 'stephpy/vim-php-cs-fixer'
 " Requirements.txt
 Plug 'raimon49/requirements.txt.vim', {'for': 'requirements'}
+" Javascript
+Plug 'pangloss/vim-javascript'
+" JSDoc
+Plug 'heavenshell/vim-jsdoc'
+" GDScript 3
+Plug 'calviken/vim-gdscript3'
+" Haskell
+Plug 'vim-scripts/haskell.vim'
+" JSONNet
+Plug 'google/vim-jsonnet'
+" JQuery
+Plug 'itspriddle/vim-jquery'
+" Twig
+Plug 'evidens/vim-twig'
 " Typescript
 Plug 'leafgarland/typescript-vim'
 " Yats
@@ -159,6 +179,68 @@ Plug 'HerringtonDarkholme/yats.vim'
 Plug 'posva/vim-vue'
 " Vue-plugin
 Plug 'leafOfTree/vim-vue-plugin'
+" Bash support
+Plug 'vim-scripts/bash-support.vim'
+" Golang
+Plug 'jnwhiteh/vim-golang'
+" Protobuf
+Plug 'uarun/vim-protobuf'
+" EditorConfig
+Plug 'editorconfig/editorconfig-vim'
+" Python PEP8 indent
+Plug 'hynek/vim-python-pep8-indent'
+" Blockle
+Plug 'jgdavey/vim-blockle'
+" EasyMotion
+Plug 'skwp/vim-easymotion'
+" Beautify
+Plug 'alpaca-tc/beautify.vim'
+" PLSQL
+Plug 'vim-scripts/plsql.vim--Lysyonok'
+" Rainbow CSV
+Plug 'mechatroner/rainbow_csv'
+" DBEXT
+Plug 'vim-scripts/dbext.vim'
+" EX Taglist
+Plug 'exvim/ex-taglist'
+" SQLUtilities
+Plug 'vim-scripts/SQLUtilities'
+" SQLComplete
+Plug 'vim-scripts/SQLComplete.vim'
+" PGFormatter
+Plug 'darold/pgformatter'
+" Project
+Plug 'shemerey/vim-project'
+" Ruby Debugger
+Plug 'astashov/vim-ruby-debugger'
+" Perl support
+Plug 'vim-scripts/perl-support.vim'
+" Buffet
+Plug 'bagrat/vim-buffet'
+" Gitgutter
+Plug 'airblade/vim-gitgutter'
+" NERDCommenter
+Plug 'scrooloose/nerdcommenter'
+" Repeat
+Plug 'tpope/vim-repeat'
+" Yoink
+Plug 'svermeulen/vim-yoink'
+" Abolish
+Plug 'tpope/vim-abolish'
+" CSS Color
+Plug 'ap/vim-css-color'
+" Autoformat
+Plug 'chiel92/vim-autoformat'
+" Fish
+Plug 'dag/vim-fish'
+" Splitjoin
+Plug 'andrewradev/splitjoin.vim'
+"" Colorschemes
+Plug 'morhetz/gruvbox'
+Plug 'w0ng/vim-hybrid'
+Plug 'sjl/badwolf'
+Plug 'arcticicestudio/nord-vim'
+Plug 'chase/vim-ansible-yaml'
 call plug#end()
 
 " Make MAP-s
@@ -169,6 +251,28 @@ map <leader>z :Goyo<CR>
 map <leader>b :CtrlPBuffer<CR>
 map <leader>j :CtrlP<CR>
 map <C-b> :CtrlPBuffer<CR>
+map <C-t> :call g:TU.run()<CR>
+map <F7>  :call g:RubyDebugger.step()<CR>
+map <F5>  :call g:RubyDebugger.next()<CR>
+map <F8>  :call g:RubyDebugger.continue()<CR>
+
+" Make XMAP-s
+xmap y <plug>(YoinkYankPreserveCursorPosition)
+
+" Make OMAP-s
+
+" Make NMAP-s
+nmap <c-n> <plug>(YoinkPostPasteSwapBack)
+nmap <c-p> <plug>(YoinkPostPasteSwapForward)
+nmap p <plug>(YoinkPaste_p)
+nmap P <plug>(YoinkPaste_P)
+nmap gp <plug>(YoinkPaste_gp)
+nmap gP <plug>(YoinkPaste_gP)
+nmap [y <plug>(YoinkRotateBack)
+nmap ]y <plug>(YoinkRotateForward)
+nmap <c-=> <plug>(YoinkPostPasteToggleFormat)
+nmap y <plug>(YoinkYankPreserveCursorPosition)
+nmap <expr> <c-p> yoink#canSwap() ? '<plug>(YoinkPostPasteSwapForward)' : '<Plug>(ctrlp)'
 
 " Make NNOREMAP-s
 nnoremap bash_example i#!/usr/bin/env bash<ESC>o<ESC>ofunction run(){<ESC>o<ESC>o}<ESC>o<ESC>run<ESC>ki<S-TAB>
@@ -178,6 +282,28 @@ nnoremap N Nzzzv
 nnoremap <silent> <F2> :NERDTreeFind<CR>
 nnoremap <silent> <F3> :NERDTreeToggle<CR>
 nnoremap <silent> <leader>sh :terminal<CR>
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+nnoremap m d
+nnoremap mm dd
+nnoremap M D
+nnoremap x d
+nnoremap xx dd
+nnoremap X D
+
+" Make INOREMAP-s
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" Make XNOREMAP-s
+xnoremap m d
+xnoremap x d
+
+" Make ONOREMAP-s
+onoremap ie :exec "normal! ggVG"<cr>
+onoremap iv :exec "normal! HVL"<cr>
 
 " Make CNOREABBREV-s
 cnoreabbrev W! w!
@@ -219,3 +345,7 @@ if exists('$SHELL')
 else
 	set shell=/bin/sh
 endif
+
+" Settings
+set background=dark
+colorscheme gruvbox
