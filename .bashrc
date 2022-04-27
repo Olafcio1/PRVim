@@ -9,6 +9,7 @@ YELLOWtt="`tput setaf 3``tput bold`"
 BLACKtt="`tput setaf 8``tput bold`"
 RESET="`tput sgr0`"
 PS1="\[$BLUEbg\]\[$YELLOWtt\]`whoami`\[$YELLOWbg\]\[$BLACKtt\]\w\[$RESET\]$ "
+PATH="$PATH:/c/Users/olafc/Downloads/ctags58/ctags58"
 function vim(){
     if [[ "$1" == "" ]]; then
         /usr/bin/vim

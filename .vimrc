@@ -5,7 +5,7 @@ let PRVIM_version="0.3"
 " Make LET-s
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
 let home_dir = $HOME
-let prvim_dir = home_dir.'/.prvim'
+let g:PRvim_dir = home_dir.'/.prvim'
 let mapleader=','
 let g:sesion_directory = "~/.vim/session"
 let g:session_autoload = "no"
@@ -24,11 +24,6 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
-
-if empty(glob(home_dir . '/.prvim'))
-  silent execute '!mkdir '.prvim_dir
-endif
-silent execute '!echo '.PRVIM_version.'>'.prvim_dir.'/.installed'
 
 " Make SET-s
 set number
@@ -72,6 +67,33 @@ set clipboard=unnamedplus
 filetype indent on
 
 " Add and configure plugins
+call plug#begin()
+"" Colorschemes
+Plug 'morhetz/gruvbox'
+Plug 'w0ng/vim-hybrid'
+Plug 'sjl/badwolf'
+Plug 'arcticicestudio/nord-vim'
+call plug#end()
+"" Configurable PRVim settings
+function ConfigurableSettings()
+  echo 'echo "Select your colorscheme [gruvbox/hybrid/badwolf/nord]: "; read; echo "$REPLY">'.g:PRvim_dir.'/set/colorscheme' > g:PRvim_dir."/init/colorscheme.sh"
+  echo 'echo "Select your background [light/dark]: "; read; echo "$REPLY">'.g:PRvim_dir.'/set/background' > g:PRvim_dir."/init/background.sh"
+  command! -nargs=* -complete=shellcmd R g:PRvim_dir."/init/colorscheme.sh"
+  command! -nargs=* -complete=shellcmd R g:PRvim_dir."/init/background.sh"
+endfunction
+
+if empty(glob(home_dir . '/.prvim'))
+  silent execute '!mkdir '.g:PRvim_dir
+  silent execute '!mkdir '.g:PRvim_dir.'/init'
+  silent execute '!mkdir '.g:PRvim_dir.'/set'
+  call ConfigurableSettings()
+endif
+silent execute '!echo '.PRVIM_version.'>'.g:PRvim_dir.'/.installed'
+silent execute '!echo '.PRVIM_version.'>'.g:PRvim_dir.'/installed'
+
+execute "colorscheme ".system('cat '.g:PRvim_dir.'/set/colorscheme')
+execute "set background=".system('cat '.g:PRvim_dir.'/set/background')
+
 call plug#begin()
 " ALE
 Plug 'dense-analysis/ale'
@@ -235,13 +257,16 @@ Plug 'chiel92/vim-autoformat'
 Plug 'dag/vim-fish'
 " Splitjoin
 Plug 'andrewradev/splitjoin.vim'
-"" Colorschemes
-Plug 'morhetz/gruvbox'
-Plug 'w0ng/vim-hybrid'
-Plug 'sjl/badwolf'
-Plug 'arcticicestudio/nord-vim'
+" Ansible YAML
 Plug 'chase/vim-ansible-yaml'
 call plug#end()
+" Make some functions
+function! GetDate(format)
+  let format = empty(a:format) ? '+%A %Y-%m-%d %H:%M UTC' : a:format
+  let cmd = '/bin/date -u ' . shellescape(format)
+  let result = substitute(system(cmd), '[\]\|[[:cntrl:]]', '', 'g')
+  call setline(line('.'), getline('.') . ' ' . result)
+endfunction
 
 " Make MAP-s
 map <leader>nn :NERDTreeToggle<CR>
@@ -255,6 +280,9 @@ map <C-t> :call g:TU.run()<CR>
 map <F7>  :call g:RubyDebugger.step()<CR>
 map <F5>  :call g:RubyDebugger.next()<CR>
 map <F8>  :call g:RubyDebugger.continue()<CR>
+map <C-s> :w<CR>
+map <C-q> :q<CR>
+map <C-c> :copy 
 
 " Make XMAP-s
 xmap y <plug>(YoinkYankPreserveCursorPosition)
@@ -289,6 +317,7 @@ nnoremap M D
 nnoremap x d
 nnoremap xx dd
 nnoremap X D
+nnoremap <F9> :call GetDate('')<CR>
 
 " Make INOREMAP-s
 inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
@@ -342,7 +371,3 @@ if exists('$SHELL')
 else
 	set shell=/bin/sh
 endif
-
-" Settings
-set background=dark
-colorscheme gruvbox
