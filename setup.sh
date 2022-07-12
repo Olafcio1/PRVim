@@ -18,7 +18,7 @@
 #===============================================================================
 
 set -o nounset                              # Treat unset variables as an error
-version="0.3"
+version="0.5"
 
 echo '
  _____  _______      ___           
@@ -78,11 +78,19 @@ case $tmp in
             esac
         fi
         cp ./.vimrc $HOME/.vimrc
+        if [[ ! -d "$HOME/.vim" ]]; then
+        	mkdir $HOME/.vim
+		fi
+        cp ./coc-settings.json $HOME/.vim/coc-settings.json
     ;;
     "v"*) echo "Ok, installing on virtual environment...";
         echo -n "Virtual environment path: "
         read path
         cp ./.vimrc $path/.vimrc
+        if [[ ! -d "$HOME/.vim" ]]; then
+        	mkdir $HOME/.vim
+		fi
+        cp ./coc-settings.json $HOME/.vim/coc-settings.json
         cp ./.bashrc_virtualenv $path/.bashrc
         vim $path/.bashrc
         echo -n "Do you want to launch created virtual environment now [Y/n]? "
