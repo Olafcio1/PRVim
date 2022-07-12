@@ -6,10 +6,9 @@
 function dc(){
     echo "Command '$1' is disabled in virtual environment."
 }
-USER="olafcio" # Your username in virtual environment
 OHOME="$HOME"; export OHOME # For programs that want your real home, not home in virtual environment
-HOME="/Users/olafcio/.virtualenv_OlafcioVirtualBashPC"; export HOME # Your home directory in virtual environment
-HOSTNAME="OlafcioVirtualBashPC"; export HOSTNAME # Your hostname in virtual environment
+HOME="$HOME/.virtualenv_OlafcioVirtualBashPC"; export HOME # Your home directory in virtual environment
+HOSTNAME="MyOwnVirtualEnvironment" export HOSTNAME # Your hostname in virtual environment
 function whoami(){
     echo "$USER"
 }
