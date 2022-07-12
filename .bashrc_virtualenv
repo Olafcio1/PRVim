@@ -38,14 +38,6 @@ alias fgrep="fgrep --color=auto"
 alias l="ls -l"
 alias la="ls -la"
 PS1="\[$BLUEbg\]\[$YELLOWtt\]`whoami`\[$YELLOWbg\]\[$BLACKtt\]\w\[$RESET\]$ "
-function vim(){
-    if [[ "$1" == "" ]]; then
-        /usr/bin/vim
-    elif [[ "$1" != "" && "$1" != "+PlugInstall" ]]; then
-        /usr/bin/vim +NERDTreeToggle $@
-    fi
-}
-alias vimupdate="/usr/bin/vim +PlugInstall"
 function save_backup(){
     if [[ -d "$HOME/.backup" ]]; then
         echo " WARNING: Overwritting old backup!"
