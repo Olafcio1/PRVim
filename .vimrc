@@ -1,373 +1,539 @@
-" PRVim - Programming Ready Vim
-" PRVim is Vim with special config to make Vim 'programming ready', like an IDE.
-let PRVIM_version="0.3"
-
-" Make LET-s
-let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
-let home_dir = $HOME
-let g:PRvim_dir = home_dir.'/.prvim'
-let mapleader=','
-let g:sesion_directory = "~/.vim/session"
-let g:session_autoload = "no"
-let g:session_autosave = "no"
-let g:session_command_aliases = 1
-let no_buffers_menu=1
-let g:CSApprox_loaded = 1
-let g:indentLine_enabled = 1
-let g:indentLine_concealcursor = 0
-let g:indentLine_char = '┆'
-let g:indentLine_faster = 1
-let start=line('.')
-
-" Add plug.vim
-if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+" Checks for needed things
+if (empty(glob('~/.vim/.setupdone')))
+   silent !echo "Please see https://github.com/christoomey/vim-tmux-navigator\#add-a-snippet to make TMUX navigator work."
+   silent !echo -n "[click any key to continue]"
+   silent !read -s -n 1
+   silent !touch $HOME"/.vim/.setupdone"
+endif
+if !has("autocmd")
+   !echo "Please update to newer version of Vim, autocmd is required to make PRVim work."
+   q
+endif
+if has("win16") || has("win32") || has("win64") || has("win98")
+   !echo "Windows is not supported by PRVim. Please install Git Bash or WSL(1/2) to run PRVim."
 endif
 
-" Make SET-s
-set number
+
+
+" Vim-Plug installation
+if empty(glob('~/.vim/autoload/plug.vim'))
+   silent !mkdir -p ~/.vim/autoload
+   silent !curl "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" > ~/.vim/autoload/plug.vim
+endif
+autocmd VimEnter * if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
+   \| PlugInstall --sync | source $MYVIMRC
+\| endif
+
+
+
+" Vim-Plug plugins & theirs' configurations
+call plug#begin()
+" Color schemes {
+"" gruvbox
+Plug 'morhetz/gruvbox'
+" }
+
+" Icons {
+"" vim-devicons
+Plug 'ryanoasis/vim-devicons'
+" }
+
+" Snippets {
+"" vim-snipmate
+Plug 'garbas/vim-snipmate' |
+"" vim-snippets
+	\ Plug 'honza/vim-snippets'
+""" Configuration of them all
+let g:snipMate = {'snippet_version': 1}
+" }
+
+" CSS {
+" vim-css3-syntax
+Plug 'hail2u/vim-css3-syntax'
+"" vim-css-color
+Plug 'ap/vim-css-color'
+" }
+
+" CSV {
+"" csv
+Plug 'chrisbra/csv.vim'
+" }
+Plug 'tpope/vim-fugitive'
+
+" Ruby {
+"" vim-byebug-breakpoints
+Plug 'kmewhort/vim-byebug-breakpoints'
+" }
+
+" Bash {
+"" bash-support
+Plug 'vim-scripts/bash-support.vim'
+" }
+
+" PHP {
+"" phpcomplete
+Plug 'shawncplus/phpcomplete.vim', { 'for': 'php' }
+" }
+
+" Javascript {
+"" vim-javascript
+Plug 'pangloss/vim-javascript'
+"" vim-jsdoc
+Plug 'heavenshell/vim-jsdoc', { 'for': 'javascript' }
+" }
+
+" Python {
+"" vim-python-pep8-indent
+Plug 'hynek/vim-python-pep8-indent', { 'for': 'python' }
+" }
+
+" HTML {
+"" emmet-vim
+Plug 'mattn/emmet-vim'
+" }
+
+" Misc - files tree ("Project" tab in JetBrains's IDEs) {
+"" nerdtree
+Plug 'preservim/nerdtree' |
+"" nerdtree-git-plugin
+	\ Plug 'Xuyuanp/nerdtree-git-plugin' |
+"" vim-nerdtree-syntax-highlight
+	\ Plug 'tiagofumo/vim-nerdtree-syntax-highlight' |
+"" nerdtree-visual-selection
+	\ Plug 'PhilRunninger/nerdtree-visual-selection' |
+"" nerdtree-project
+	\ Plug 'scrooloose/nerdtree-project-plugin'
+""" Configuration of them all
+let g:NERDTreeGitStatusIndicatorMapCustom = {
+                \ 'Modified'  :'✹',
+                \ 'Staged'    :'✚',
+                \ 'Untracked' :'✭',
+                \ 'Renamed'   :'➜',
+                \ 'Unmerged'  :'═',
+                \ 'Deleted'   :'✖',
+                \ 'Dirty'     :'✗',
+                \ 'Ignored'   :'☒',
+                \ 'Clean'     :'✔︎',
+                \ 'Unknown'   :'?',
+                \ }
+let g:NERDTreeGitStatusUntrackedFilesMode = 'all'
+Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'PhilRunninger/nerdtree-visual-selection'
+function! IsNerdTreeEnabled()
+	return exists('t:NERDTreeBufName') && bufwinnr(t:NERDTreeBufName) != -1
+endfunction
+if !IsNerdTreeEnabled()
+	autocmd VimEnter * silent NERDTreeCWD | wincmd p
+endif
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree")
+	\ && b:NERDTree.isTabTree()) | q | endif
+" }
+
+" Misc - autocomplete {
+"" supertab
+Plug 'ervandew/supertab'
+let g:SuperTabCrMapping = 0
+let g:SuperTabDefaultCompletionType = "context"
+"" AutoComplPop
+Plug 'vim-scripts/AutoComplPop'
+"" jedi-vim
+Plug 'davidhalter/jedi-vim'
+let g:jedi#use_tabs_not_buffers = 1
+if has('unix')
+	let g:jedi#environment_path = "/usr/bin/python3"
+elseif has('macunix')
+	let g:jedi#environment_path = "/usr/local/bin/python3"
+endif
+"" coc
+Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
+let g:coc_global_config="$HOME/.config/coc/coc-settings.json"
+" }
+
+" Misc {
+"" ale
+Plug 'dense-analysis/ale' |
+	\ let g:ale_linters = {'c': ['ccls', 'clang'], 'cpp': ['clang'], 'javascript': ['eslint'], 'php': ['php'], 'python': ['pyls', 'flake8'], 'vim': ['vint']} |
+	\ let g:ale_fixers = {'*': ['trim_whitespace'], 'c': ['clang-format'], 'cpp': ['clang-format'], 'css': ['prettier'], 'javascript': ['prettier'], 'json': ['prettier'], 'php': ['prettier'], 'python': ['black'], 'scss': ['prettier'], 'yaml': ['prettier']} |
+"" typescript
+	\ Plug 'leafgarland/typescript-vim' |
+"" tsuquyomi
+	\ Plug 'Quramy/tsuquyomi' |
+"" vim-js-indent
+	\ Plug 'jason0x43/vim-js-indent' |
+"" vim-js-pretty-template
+	\ Plug 'Quramy/vim-js-pretty-template' |
+"" vim-go
+	\ Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' } |
+	\ map <C-.> :cnext<CR> |
+	\ map <C-,> :cprevious<CR> |
+	\ nnoremap <leader>a :cclose<CR> |
+	\ let g:go_list_type = "quickfix" |
+	\ let g:go_highlight_fields = 1 |
+	\ let g:go_highlight_functions = 1 |
+	\ let g:go_highlight_function_calls = 1 |
+	\ let g:go_highlight_extra_types = 1 |
+	\ let g:go_highlight_operators = 1 |
+	\ let g:go_fmt_autosave = 1 |
+	\ let g:go_fmt_command = "goimports" |
+	\ let g:go_auto_type_info = 1 |
+"" php
+	\ Plug 'stanangeloff/php.vim' |
+"" phpactor
+	\ Plug 'phpactor/phpactor' |
+"" vim-php-cs-fixer
+	\ Plug 'stephpy/vim-php-cs-fixer'
+"" vim-checkhealth
+Plug 'rhysd/vim-healthcheck'
+"" startify
+Plug 'mhinz/vim-startify'
+function s:utilitycommands()
+	return [
+		\ { 'line': 'Update plugins', 'cmd': 'PlugInstall' },
+		\ { 'line': 'Check editor health', 'cmd': 'CheckHealth' },
+		\ ]
+endfunction
+let g:startify_session_dir = '~/.vim/session'
+let g:startify_lists = [ 
+	\ { 'type': 'files',                       'header': ['    Recent files']              },
+	\ { 'type': 'dir',                         'header': ['    Recent files in '.getcwd()] },
+	\ { 'type': 'sessions',                    'header': ['    Saved sessions']            },
+	\ { 'type': function('s:utilitycommands'), 'header': ['    Utility commands']          },
+	\ ]
+let g:startify_custom_header = [
+	\ ' _____  _______      ___           ',
+	\ '|  __ \|  __ \ \    / (_)          ',
+	\ '| |__) | |__) \ \  / / _ _ __ ___  ',
+	\ '| |___/|  _  / \ \/ / | | |_ ` _ \ ',
+	\ '| |    | | \ \  \  /  | | | | | | |',
+	\ '|_|    |_|  \_\  \/   |_|_| |_| |_|',
+	\ ]
+"" vim-polyglot
+Plug 'sheerun/vim-polyglot'
+"" nerdcommenter
+Plug 'preservim/nerdcommenter'
+"" promptline
+Plug 'edkolev/promptline.vim'
+"" vim-gitgutter
+Plug 'airblade/vim-gitgutter'
+"" tagbar
+Plug 'preservim/tagbar'
+"" vim-repeat
+Plug 'tpope/vim-repeat'
+"" vim-tmux-navigator
+Plug 'christoomey/vim-tmux-navigator'
+"" fzf
+Plug 'junegunn/fzf.vim'
+"" vim-dispatch
+Plug 'tpope/vim-dispatch'
+"" vim-move
+Plug 'matze/vim-move'
+let g:move_key_modifier = 'C'
+let g:move_key_modifier_visualmode = 'S'
+"" vim-signature
+Plug 'kshenoy/vim-signature'
+"" vim-misc
+Plug 'xolox/vim-misc'
+"" vim-latex
+Plug 'vim-latex/vim-latex', { 'for': 'latex' }
+"" vim-json
+Plug 'leshill/vim-json', { 'for': 'json' }
+"" vim-addon-mw-utils
+Plug 'MarcWeber/vim-addon-mw-utils'
+"" tlib_vim
+Plug 'tomtom/tlib_vim'
+"" command-t
+Plug 'wincent/command-t'
+"" vim-autopairs
+Plug 'LunarWatcher/auto-pairs'
+"" vim-airline
+Plug 'vim-airline/vim-airline'
+"" vim-airline-themes
+Plug 'vim-airline/vim-airline-themes'
+" }
+
+" C++ {
+"" vim-fswitch
+Plug 'derekwyatt/vim-fswitch'
+"" vim-protodef
+Plug 'derekwyatt/vim-protodef'
+" }
+call plug#end()
+
+
+
+" Another configuration
+"" Selecting with Shift
+nmap <S-Up> v<Up>
+nmap <S-Down> v<Down>
+nmap <S-Left> v<Left>
+nmap <S-Right> v<Right>
+vmap <S-Up> <Up>
+vmap <S-Down> <Down>
+vmap <S-Left> <Left>
+vmap <S-Right> <Right>
+imap <S-Up> <Esc>v<Up>
+imap <S-Down> <Esc>v<Down>
+imap <S-Left> <Esc>v<Left>
+imap <S-Right> <Esc>v<Right>
+
+"" AutoCMD for file with specified types
+autocmd FileType java let b:dispatch = 'javac %'
+autocmd FileType python setlocal completeopt-=preview
+autocmd FileType go nmap <F10>  <Plug>(go-test)<Plug>(go-run)
+
+"" PRVim settings (configurable)
+colorscheme gruvbox
 set mouse=a
+
+"" Complete menu
+set omnifunc=syntaxcomplete#Complete
+autocmd FileType go set omnifunc=go#complete#Complete
+set completeopt=longest,menuone
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+inoremap <expr> <C-n> pumvisible() ? '<C-n>' :
+	\ '<C-n><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+inoremap <expr> <M-,> pumvisible() ? '<C-n>' :
+	\ '<C-x><C-o><C-n><C-p><C-r>=pumvisible() ? "\<lt>Down>" : ""<CR>'
+inoremap <expr> <C-p> pumvisible() ? '<C-p>' :
+	\ '<C-p><C-r>=pumvisible() ? "\<lt>Up>" : ""<CR>'
+
+"" Misc settings, not configurable
 set nocompatible
-set tabstop=4
-set shiftround
+set encoding=utf-8 nobomb
+scriptencoding utf-8
+set fileformats=unix,mac,dos
+let mapleader=","
+let maplocalleader=",,"
+set formatoptions=
+set formatoptions+=c
+set formatoptions+=q
+set formatoptions+=n
+set formatoptions+=2
+set formatoptions+=l
+set formatoptions+=1
+au FocusLost * :wa
+if has('filetype')
+	filetype indent plugin on
+	set fileformat=unix
+endif
+syntax on
+set hidden
+set wildmenu
+set showcmd
+set hlsearch
+set ignorecase
+set smartcase
+set backspace=indent,eol,start
+set autoindent
+set smartindent
+set nostartofline
+set ruler
+set laststatus=2
+set confirm
+set visualbell
+set t_vb=
+if has('mouse')
+  set mouse=a
+endif
+set cmdheight=2
+set number
+set notimeout ttimeout ttimeoutlen=200
+set pastetoggle=<F11>
 set shiftwidth=4
 set softtabstop=4
 set expandtab
-set laststatus=2
-set ttyfast
-set hidden
-set hlsearch
-set incsearch
-set ignorecase
-set smartcase
 set ruler
-set wildmenu
-set mousemodel=popup
-set t_Co=256
-set guioptions=egmrti
-set gfn=Monospace\ 10
-set gcr=a:blinkon0
-set scrolloff=3
-set modeline
-set modelines=10
-set title
-set titleold="Terminal"
-set titlestring=%F
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite,*node_modules/
+set showcmd
+set mousehide
+set cursorline
+set showmatch
+map Y y$
+nnoremap <C-L> :nohl<CR><C-L>
+nmap <leader>w :w!<CR>
+map <C-F> /
+map <C-f> /
+map <silent> <CR> :noh<CR>
+map <C-j> <C-W>j
+map <C-k> <C-W>k
+map <C-h> <C-W>h
+map <C-l> <C-W>l
+map <F4> :tabclose<CR>
+imap <F4> :tabclose<CR>
+vmap <F4> :tabclose<CR>
+map <C-Home>	:1<CR>
+imap <C-Home>	:1<CR>
+vmap <C-Home>	:1<CR>
+map <C-End>		:$<CR>
+imap <C-End>	:$<CR>
+vmap <C-End>	:$<CR>
+map <Home>		<ESC>^
+imap <Home>		<ESC>^
+vmap <Home>		<ESC>^
+map <End>		<ESC>$
+imap <End>		<ESC>$
+vmap <End>		<ESC>$
+map <C-Y>		<ESC>dd<ESC>
+map <C-y>		<ESC>dd<ESC>
+vmap <C-Y>		<ESC>dd<ESC>v
+vmap <C-y>		<ESC>dd<ESC>v
+imap <C-Y>		<ESC>dd<ESC>i
+imap <C-y>		<ESC>dd<ESC>i
+map <S-e>		:NERDTreeToggle<CR>:echo "Toggled NERDTree."<CR>
+map <S-E>		:NERDTreeToggle<CR>:echo "Toggled NERDTree."<CR>
+map <C-B> :NERDTreeFromBookmark 
+map <C-b> :NERDTreeFromBookmark 
+map <S-F> :NERDTreeFind<CR>
+map <S-f> :NERDTreeFind<CR>
+let g:multi_cursor_start_word_key      = '<C-s>'
+let g:multi_cursor_select_all_word_key = '<A-s>'
+let g:multi_cursor_start_key           = 'g<C-s>'
+let g:multi_cursor_select_all_key      = 'g<A-s>'
+let g:multi_cursor_next_key            = '<C-s>'
+let g:multi_cursor_prev_key            = '<C-p>'
+let g:multi_cursor_skip_key            = '<C-x>'
+let g:multi_cursor_quit_key            = '<Esc>'
+nmap <C-p> <Plug>yankstack_substitute_older_paste
+nmap <C-n> <Plug>yankstack_substitute_newer_paste
+ino <C-j> <C-r>=snipMate#TriggerSnippet()<CR>
+snor <C-j> <esc>i<right><C-r>=snipMate#TriggerSnippet()<CR>
+vmap Si S(i_<esc>f)
+au FileType mako vmap Si S"i${ _(<esc>2f"a) }<esc>
+nmap <silent> <leader>a <Plug>(ale_next_wrap)
+map <leader>ss :setlocal spell!<CR>
+map <leader>sn ]s
+map <leader>sp [s
+map <leader>sa zg
+map <leader>s? z=
+map <leader>cc :botright cope<CR>
+map <leader>co ggVGy:tabnew<CR>:set syntax=qf<CR>pgg
+map <leader>n :cn<CR>
+map <leader>p :cp<CR>
+map <S-Y> :source ~/.vimrc<CR>
+map <S-y> :source ~/.vimrc<CR>
+autocmd VimEnter * tab all
+autocmd BufAdd * exe 'tablast | tabe "' . expand( "<afile") .'"'
+function Eval_line( )
+ :let start=line('.')
+ :exe "!eval" getline(start)
+endfunction
+map <F3> :call Eval_line()<CR>
+filetype plugin indent on
+autocmd BufEnter * :cd %:p:h
+autocmd BufReadPost * 
+\ if line("'\"") > 0 && line("'\"") <= line("$") | 
+\   exe "normal g`\"" | 
+\ endif
+set guifont=Courier_N_CE_/_Latin_2:h10:cEASTEUROPE
+map <F2> :set number!<Bar>set number?<CR>
+imap <F2> :set nu!<CR>
+set autowrite
+set hls
+set wrap
+set textwidth=0
+set splitbelow
+set splitright
+set wildmode=longest,list
+vnoremap > >gv
+vnoremap < <gv
+set tabstop=3
+set shiftwidth=3
+set noexpandtab
+set lcs=eol:\ ,tab:·\ ,trail:@
+set display+=lastline
+set whichwrap=b,s,<,>,h,l
+set incsearch
+set background=dark
 set undodir=~/.vim/undodir
 set undofile
+set shiftround
+set shiftwidth=4
+set tabstop=4
+set complete-=i
 set lazyredraw
 set display+=lastline
 set encoding=utf-8 nobomb
-set foldmethod=syntax
-set clipboard=unnamedplus
-
-" To make syntax before saving and VIM-ing file again
-filetype indent on
-
-" Add and configure plugins
-call plug#begin()
-"" Colorschemes
-Plug 'morhetz/gruvbox'
-Plug 'w0ng/vim-hybrid'
-Plug 'sjl/badwolf'
-Plug 'arcticicestudio/nord-vim'
-call plug#end()
-"" Configurable PRVim settings
-function ConfigurableSettings()
-  echo 'echo "Select your colorscheme [gruvbox/hybrid/badwolf/nord]: "; read; echo "$REPLY">'.g:PRvim_dir.'/set/colorscheme' > g:PRvim_dir."/init/colorscheme.sh"
-  echo 'echo "Select your background [light/dark]: "; read; echo "$REPLY">'.g:PRvim_dir.'/set/background' > g:PRvim_dir."/init/background.sh"
-  command! -nargs=* -complete=shellcmd R g:PRvim_dir."/init/colorscheme.sh"
-  command! -nargs=* -complete=shellcmd R g:PRvim_dir."/init/background.sh"
-endfunction
-
-if empty(glob(home_dir . '/.prvim'))
-  silent execute '!mkdir '.g:PRvim_dir
-  silent execute '!mkdir '.g:PRvim_dir.'/init'
-  silent execute '!mkdir '.g:PRvim_dir.'/set'
-  call ConfigurableSettings()
+set linebreak
+set scrolloff=1
+set sidescrolloff=5
+set wrap
+set laststatus=2
+set wildmenu
+set tabpagemax=50
+set cursorline
+set noerrorbells
+set visualbell
+set title
+set foldmethod=indent
+set foldnestmax=3
+set nofoldenable
+set autoread
+set backspace=indent,eol,start
+set confirm
+set dir=~/.vim/cache
+set formatoptions+=j
+set hidden
+set nomodeline
+set noswapfile
+set nrformats-=octal
+set wildignore+=.pyc,.swp
+let mapleader=","
+set spelllang=en_us
+set ttyfast
+set esckeys
+set nostartofline
+let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+set t_Co=256
+let g:molokai_original=0
+hi link javascriptType Keyword
+hi link colorColumn FoldColumn
+hi link LineNr Comment
+hi link OverLeength Error
+if has('gui_running')
+	" Font
+	set gfn:Monaco:h14
+	set transp=0
+	" Toolbar and scrollbars
+	set guioptions-=T       " Remove toolbar
+	set guioptions-=L       " Left scroll bar
+	set guioptions-=r       " Right scroll bar
+	set guioptions-=b       " Bottom scroll bar
+	set guioptions-=h       " Only calculate bottom scroll size of current line
+	set shortmess=atI       " Don't show the intro message at start and
+	                        " truncate msgs (avoid press ENTER msgs).
 endif
-silent execute '!echo '.PRVIM_version.'>'.g:PRvim_dir.'/.installed'
-silent execute '!echo '.PRVIM_version.'>'.g:PRvim_dir.'/installed'
-
-execute "colorscheme ".system('cat '.g:PRvim_dir.'/set/colorscheme')
-execute "set background=".system('cat '.g:PRvim_dir.'/set/background')
-
-call plug#begin()
-" ALE
-Plug 'dense-analysis/ale'
-" vim-easy-align
-Plug 'junegunn/vim-easy-align'
-" NERDTree
-Plug 'scrooloose/nerdtree'
-let g:NERDTreeChDirMode=2
-let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
-let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
-let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
-let g:NERDTreeShowBookmarks=1
-let g:nerdtree_tabs_focus_on_files=1
-let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
-let g:NERDTreeWinSize = 50
-" FZF
-Plug 'junegunn/fzf.vim'
-" Vim-Startify
-Plug 'mhinz/vim-startify'
-let g:startify_lists = [
-            \ { 'type': 'files',     'header': ['      Latest files']                   },
-            \ { 'type': 'dir',       'header': ['      Latest files in this directory'] },
-            \ { 'type': 'sessions',  'header': ['      Sessions']                       },
-            \ { 'type': 'commands',  'header': ['      Utility commands']               },
-            \ ]
-let g:startify_commands = [
-            \ ['Update plugins',       'PlugInstall'],
-            \ ['Check health',         'CheckHealth'],
-            \ ['Check plugins health', 'PlugStatus'],
-            \ ]
-let g:startify_custom_header = [
-            \ ' _____  _______      ___           ',
-            \ '|  __ \|  __ \ \    / (_)          ',
-            \ '| |__) | |__) \ \  / / _ _ __ ___  ',
-            \ '| |___/|  _  / \ \/ / | | |_ ` _ \ ',
-            \ '| |    | | \ \  \  /  | | | | | | |',
-            \ '|_|    |_|  \_\  \/   |_|_| |_| |_|',
-            \ ]
-" DelimitMate
-Plug 'raimondi/delimitmate'
-" CSS-Color
-Plug 'ap/vim-css-color'
-" Airline
-Plug 'bling/vim-airline'
-" NERDTree-Git-Plugin
-Plug 'xuyuanp/nerdtree-git-plugin'
-" Healthcheck
-Plug 'rhysd/vim-healthcheck'
-" CtrlP and CtrlP addons
-Plug 'vim-scripts/ctrlp.vim'
-Plug 'fisadev/vim-ctrlp-cmdpalette'
-Plug 'tacahiroy/ctrlp-funky'
-Plug 'davidegx/ctrlp-smarttabs'
-Plug 'tacahiroy/ctrlp-ssh'
-Plug 'okcompute/vim-ctrlp-session'
-let g:ctrlp_map = ''
-let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
-" EmacsCommandLine
-Plug 'houtsnip/vim-emacscommandline'
-" DevIcons
-Plug 'ryanoasis/vim-devicons'
-" TSLime
-Plug 'jgdavey/tslime.vim'
-" JSDoc
-Plug 'heavenshell/vim-jsdoc'
-" Move
-Plug 'matze/vim-move'
-" CSS3-syntax
-Plug 'hail2u/vim-css3-syntax'
-" Emmet
-Plug 'mattn/emmet-vim'
-" Lua-Ftplugin
-Plug 'xolox/vim-lua-ftplugin'
-" Lua-Inspect
-Plug 'xolox/vim-lua-inspect'
-" Misc
-Plug 'xolox/vim-misc'
-" Session
-Plug 'xolox/vim-session'
-" Snippets
-Plug 'honza/vim-snippets'
-" PHP-CS-Fixer
-Plug 'stephpy/vim-php-cs-fixer'
-" Requirements.txt
-Plug 'raimon49/requirements.txt.vim', {'for': 'requirements'}
-" Javascript
-Plug 'pangloss/vim-javascript'
-" JSDoc
-Plug 'heavenshell/vim-jsdoc'
-" GDScript 3
-Plug 'calviken/vim-gdscript3'
-" Haskell
-Plug 'vim-scripts/haskell.vim'
-" JSONNet
-Plug 'google/vim-jsonnet'
-" JQuery
-Plug 'itspriddle/vim-jquery'
-" Twig
-Plug 'evidens/vim-twig'
-" Typescript
-Plug 'leafgarland/typescript-vim'
-" Yats
-Plug 'HerringtonDarkholme/yats.vim'
-" Vue
-Plug 'posva/vim-vue'
-" Vue-plugin
-Plug 'leafOfTree/vim-vue-plugin'
-" Bash support
-Plug 'vim-scripts/bash-support.vim'
-" Golang
-Plug 'jnwhiteh/vim-golang'
-" Protobuf
-Plug 'uarun/vim-protobuf'
-" EditorConfig
-Plug 'editorconfig/editorconfig-vim'
-" Python PEP8 indent
-Plug 'hynek/vim-python-pep8-indent'
-" Blockle
-Plug 'jgdavey/vim-blockle'
-" EasyMotion
-Plug 'skwp/vim-easymotion'
-" Beautify
-Plug 'alpaca-tc/beautify.vim'
-" PLSQL
-Plug 'vim-scripts/plsql.vim--Lysyonok'
-" Rainbow CSV
-Plug 'mechatroner/rainbow_csv'
-" DBEXT
-Plug 'vim-scripts/dbext.vim'
-" EX Taglist
-Plug 'exvim/ex-taglist'
-" SQLUtilities
-Plug 'vim-scripts/SQLUtilities'
-" SQLComplete
-Plug 'vim-scripts/SQLComplete.vim'
-" PGFormatter
-Plug 'darold/pgformatter'
-" Project
-Plug 'shemerey/vim-project'
-" Ruby Debugger
-Plug 'astashov/vim-ruby-debugger'
-" Perl support
-Plug 'vim-scripts/perl-support.vim'
-" Buffet
-Plug 'bagrat/vim-buffet'
-" Gitgutter
-Plug 'airblade/vim-gitgutter'
-" NERDCommenter
-Plug 'scrooloose/nerdcommenter'
-" Repeat
-Plug 'tpope/vim-repeat'
-" Yoink
-Plug 'svermeulen/vim-yoink'
-" Abolish
-Plug 'tpope/vim-abolish'
-" CSS Color
-Plug 'ap/vim-css-color'
-" Autoformat
-Plug 'chiel92/vim-autoformat'
-" Fish
-Plug 'dag/vim-fish'
-" Splitjoin
-Plug 'andrewradev/splitjoin.vim'
-" Ansible YAML
-Plug 'chase/vim-ansible-yaml'
-call plug#end()
-" Make some functions
-function! GetDate(format)
-  let format = empty(a:format) ? '+%A %Y-%m-%d %H:%M UTC' : a:format
-  let cmd = '/bin/date -u ' . shellescape(format)
-  let result = substitute(system(cmd), '[\]\|[[:cntrl:]]', '', 'g')
-  call setline(line('.'), getline('.') . ' ' . result)
-endfunction
-
-" Make MAP-s
-map <leader>nn :NERDTreeToggle<CR>
-map <leader>nb :NERDTreeFromBookmark
-map <leader>nf :NERDTreeFind<CR>
-map <leader>z :Goyo<CR>
-map <leader>b :CtrlPBuffer<CR>
-map <leader>j :CtrlP<CR>
-map <C-b> :CtrlPBuffer<CR>
-map <C-t> :call g:TU.run()<CR>
-map <F7>  :call g:RubyDebugger.step()<CR>
-map <F5>  :call g:RubyDebugger.next()<CR>
-map <F8>  :call g:RubyDebugger.continue()<CR>
-map <C-s> :w<CR>
-map <C-q> :q<CR>
-map <C-c> :copy 
-
-" Make XMAP-s
-xmap y <plug>(YoinkYankPreserveCursorPosition)
-
-" Make OMAP-s
-
-" Make NMAP-s
-nmap <c-n> <plug>(YoinkPostPasteSwapBack)
-nmap <c-p> <plug>(YoinkPostPasteSwapForward)
-nmap p <plug>(YoinkPaste_p)
-nmap P <plug>(YoinkPaste_P)
-nmap gp <plug>(YoinkPaste_gp)
-nmap gP <plug>(YoinkPaste_gP)
-nmap [y <plug>(YoinkRotateBack)
-nmap ]y <plug>(YoinkRotateForward)
-nmap <c-=> <plug>(YoinkPostPasteToggleFormat)
-nmap y <plug>(YoinkYankPreserveCursorPosition)
-nmap <expr> <c-p> yoink#canSwap() ? '<plug>(YoinkPostPasteSwapForward)' : '<Plug>(ctrlp)'
-
-" Make NNOREMAP-s
-nnoremap bash_example i#!/usr/bin/env bash<ESC>o<ESC>ofunction run(){<ESC>o<ESC>o}<ESC>o<ESC>run<ESC>ki<S-TAB>
-nnoremap bash_run :!chmod +x % && source %
-nnoremap n nzzzv
-nnoremap N Nzzzv
-nnoremap <silent> <F2> :NERDTreeFind<CR>
-nnoremap <silent> <F3> :NERDTreeToggle<CR>
-nnoremap <silent> <leader>sh :terminal<CR>
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-nnoremap m d
-nnoremap mm dd
-nnoremap M D
-nnoremap x d
-nnoremap xx dd
-nnoremap X D
-nnoremap <F9> :call GetDate('')<CR>
-
-" Make INOREMAP-s
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
-" Make XNOREMAP-s
-xnoremap m d
-xnoremap x d
-
-" Make ONOREMAP-s
-onoremap ie :exec "normal! ggVG"<cr>
-onoremap iv :exec "normal! HVL"<cr>
-
-" Make CNOREABBREV-s
-cnoreabbrev W! w!
-cnoreabbrev Q! Q!
-cnoreabbrev Qal! qall!
-cnoreabbrev Wq wq
-cnoreabbrev Wa wa
-cnoreabbrev wQ wq
-cnoreabbrev WQ wq
-cnoreabbrev W w
-cnoreabbrev Q q
-cnoreabbrev Qall qall
-
-" Make IF-s
-if has("gui_running")
-	if has("gui_mac") || has("gui_macvim")
-		set guifont=Menlo:h12
-		set transparency=7
-	endif
-else
-	let g:CSApprox_loaded = 1
-	let g:indentLine_enabled = 1
-	let g:indentLine_concealcursor = 0
-	let g:indentLine_char = '┆'
-	let g:indentLine_faster = 1
-	if $COLORTERM == 'gnome-terminal'
-		set term=gnome-256color
-	else
-		if $TERM == 'xterm'
-			set term=xterm-256color
-		endif
-	endif
+set laststatus=2
+set numberwidth=5
+set report=0
+set showmode
+set showcmd
+set showmatch
+set scrolloff=5
+set sidescrolloff=7
+set sidescroll=1
+if has('title') && (has('gui_running') || &title)
+	set titlestring=
+	set titlestring+=%f
+	set titlestring+=%h%m%r%w
+	set titlestring+=\ -\ %{v:progname}
+	set titlestring+=\ -\ %{substitute(getcwd(),\ $HOME,\ '~',\ '')}
 endif
-if &term =~ '256color'
-	set t_ut=
-endif
-if exists('$SHELL')
-	set shell=$SHELL
-else
-	set shell=/bin/sh
-endif
+set wildchar=<TAB>
+set wildmode=list:longest
+set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/node_modules/*
+set wildignore+=*.DS_STORE,*.db,node_modules/**,*.jpg,*.png,*.gif
+set wildignore+=*/coverage
+set diffopt=filler
+set diffopt+=iwhite
+set foldmethod=manual
+set foldnestmax=3
+set nofoldenable
+set listchars=tab:▹\ ,trail:·,nbsp:⚋
+set fillchars=fold:-
+set list
+set noerrorbells
+set copyindent
+map <C-q> :qa<CR>
+map <C-Q> :qa<CR>
+map <C-S> :wall!<CR>:echo "Saved! (to quit click F10)"<CR>
+map <C-s> :wall!<CR>:echo "Saved! (to quit click F10)"<CR>
