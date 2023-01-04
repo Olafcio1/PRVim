@@ -1,6 +1,6 @@
 # PRVim
 PRVim - Programming Ready Vim, like an IDE.<br>
-Created by Olafcio (Discord: OlafcioooX#0199)
+Created by Olafcio (Discord: OlafcioooX#8823)
 ## What's it?
 PRVim is an Vim config, but when you run Vim using this config, it will be just... an very nice IDE.
 ## How to setup?
